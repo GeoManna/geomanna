@@ -204,7 +204,7 @@ contract MintableToken is StandardToken, Ownable {
 
 }
 
-contract BurnableToken is StandardToken {
+contract BurnableToken is MintableToken {
 
     /**
      * @dev Burns a specific amount of tokens.
@@ -222,7 +222,7 @@ contract BurnableToken is StandardToken {
 
 }
 
-contract ERC20GeoManna is MintableToken, BurnableToken{
+contract ERC20GeoManna is BurnableToken{
 
     string public constant name = "GeoManna";
 
@@ -253,7 +253,6 @@ contract Crowdsale is Ownable {
     uint public softcap;
     address public wallet; //кошелек сбора средств
     uint public minPrice;
-    address public referer;
     uint public coin;
     uint public bonusCount;
 
@@ -262,8 +261,8 @@ contract Crowdsale is Ownable {
 
     function Crowdsale(address _wallet) {
         token = new ERC20GeoManna();
-        start = 1523491200;
-        end = 1527897599;
+        start = 1525132800;
+        end = 1527811200;
         rate = 0.0002 * 1 ether;
         softcap = 500 * 1 ether;
         wallet = _wallet;
@@ -300,10 +299,6 @@ contract Crowdsale is Ownable {
         }
     }
 
-    function setReferer(address _referer) public {
-        referer = _referer;
-    }
-
     //Продажа
     function createTokens() saleIsOn  payable {
         require(msg.value>=minPrice);
@@ -320,7 +315,7 @@ contract Crowdsale is Ownable {
         balances[msg.sender] = balances[msg.sender].add(msg.value.sub(rest));
 
         if(msg.data.length == 20) {
-            referer = bytesToAddress(bytes(msg.data));
+            address referer = bytesToAddress(bytes(msg.data));
             // проверка, чтобы инвестор не начислил бонусы сам себе
             require(referer != msg.sender);
             uint refererTokens = tokens.mul(10).div(100);
